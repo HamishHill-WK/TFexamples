@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "org.tensorflow.lite.examples.imageclassification.app-mergeDebugResources-4:/layout/fragment_camera.xml",
+        "source": "org.tensorflow.lite.examples.imageclassification.app-main-7:/layout/fragment_camera.xml"
+    },
+    {
+        "merged": "org.tensorflow.lite.examples.imageclassification.app-mergeDebugResources-4:/layout/activity_main.xml",
+        "source": "org.tensorflow.lite.examples.imageclassification.app-main-7:/layout/activity_main.xml"
+    },
+    {
+        "merged": "org.tensorflow.lite.examples.imageclassification.app-mergeDebugResources-4:/layout/item_classification_result.xml",
+        "source": "org.tensorflow.lite.examples.imageclassification.app-main-7:/layout/item_classification_result.xml"
+    },
+    {
+        "merged": "org.tensorflow.lite.examples.imageclassification.app-mergeDebugResources-4:/layout/info_bottom_sheet.xml",
+        "source": "org.tensorflow.lite.examples.imageclassification.app-main-7:/layout/info_bottom_sheet.xml"
+    }
+]
