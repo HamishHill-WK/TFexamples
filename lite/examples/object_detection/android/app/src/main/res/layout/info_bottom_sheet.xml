@@ -33,6 +33,7 @@
         android:layout_height="match_parent">
 
         <!-- Chevron indicating that the bottom sheet is expandable -->
+
         <RelativeLayout
             android:layout_height="wrap_content"
             android:layout_width="match_parent">
@@ -43,6 +44,7 @@
                 android:layout_centerVertical="true"
                 android:src="@drawable/icn_chevron_up"
                 android:contentDescription="@string/alt_bottom_sheet_chevron" />
+
         </RelativeLayout>
 
         <!-- Inference time row -->
@@ -269,5 +271,11 @@
                 android:entries="@array/models_spinner_titles"/>
 
         </RelativeLayout>
+
+        <Button
+            android:id="@+id/SendButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.core.widget.NestedScrollView>
