@@ -24,7 +24,6 @@ import android.view.Surface
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
-import org.tensorflow.lite.support.image.ops.Rot90Op
 import org.tensorflow.lite.task.core.BaseOptions
 import org.tensorflow.lite.task.core.vision.ImageProcessingOptions
 import org.tensorflow.lite.task.vision.classifier.Classifications
@@ -77,7 +76,7 @@ class ImageClassifierHelper(
         val modelName =
             when (currentModel) {
                 MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
-                MODEL_EFFICIENTNETV0 -> "model(3).tflite"
+                MODEL_EFFICIENTNETV0 -> "model.tflite"
                 MODEL_EFFICIENTNETV1 -> "efficientnet-lite1.tflite"
                 MODEL_EFFICIENTNETV2 -> "efficientnet-lite2.tflite"
                 else -> "mobilenetv1.tflite"

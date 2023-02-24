@@ -34,4 +34,10 @@
     <include
         android:id="@+id/bottom_sheet_layout"
         layout="@layout/info_bottom_sheet" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/Capture_Crop" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -17,18 +17,37 @@
 package org.tensorflow.lite.examples.imageclassification
 
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.StrictMode
+import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 import org.tensorflow.lite.examples.imageclassification.databinding.ActivityMainBinding
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.PrintWriter
+import java.net.Socket
 
 class MainActivity : AppCompatActivity() {
     private lateinit var activityMainBinding: ActivityMainBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
+        //setContentView(R.layout.activity_main)
+
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
+        val rollButton: Button = findViewById(R.id.button)
+        rollButton.setOnClickListener {
+            println("button press")
+            client()
+        }
+
+        //
     }
+
+    var resultText : String =" "
 
     override fun onBackPressed() {
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
@@ -39,4 +58,33 @@ class MainActivity : AppCompatActivity() {
             super.onBackPressed()
         }
     }
+
+    public fun setMessage(newItem: String) {
+        if(newItem != "--")
+        {
+            resultText = newItem
+        println(resultText)}
+
+    }
+
+    fun getMessage() :String{
+        return resultText
+    }
+
+    private fun client() {
+        val client = Socket("192.168.0.14", 9999)
+        val output = PrintWriter(client.getOutputStream(), true)
+        val input = BufferedReader(InputStreamReader(client.inputStream))
+
+        resultText = "ima message "
+
+        //resultText = ClassificationResultsAdapter().getItemName()
+
+
+        println(" hello ")
+        output.println(resultText)
+        println("Client receiving [${input.readLine()}]")
+        client.close()
+    }
+
 }

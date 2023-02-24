@@ -19,6 +19,7 @@ package org.tensorflow.lite.examples.imageclassification.fragments
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import org.tensorflow.lite.examples.imageclassification.MainActivity
 import org.tensorflow.lite.examples.imageclassification.databinding.ItemClassificationResultBinding
 import org.tensorflow.lite.support.label.Category
 import org.tensorflow.lite.task.vision.classifier.Classifications
@@ -65,6 +66,8 @@ class ClassificationResultsAdapter :
         }
     }
 
+
+
     override fun getItemCount(): Int = categories.size
 
     inner class ViewHolder(private val binding: ItemClassificationResultBinding) :
@@ -72,9 +75,17 @@ class ClassificationResultsAdapter :
 
         fun bind(label: String?, score: Float?) {
             with(binding) {
+                //if (label != null) { MainActivity().setMessage(label) }
                 tvLabel.text = label ?: NO_VALUE
                 tvScore.text = if (score != null) String.format("%.2f", score) else NO_VALUE
             }
         }
+    }
+
+    fun getItemName(): String{
+        if(getItemCount() > 0 )
+            return categories[0]?.label ?: toString()
+        else
+            return "nothing detected "
     }
 }

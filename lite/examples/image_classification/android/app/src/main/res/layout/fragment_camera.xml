@@ -48,4 +48,5 @@
         android:background="@color/bounding_box_color"
         app:layout_anchor="@id/recyclerview_results"
         app:layout_anchorGravity="bottom" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
