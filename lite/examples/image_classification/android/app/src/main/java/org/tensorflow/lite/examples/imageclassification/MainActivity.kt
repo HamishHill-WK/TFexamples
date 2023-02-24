@@ -41,13 +41,13 @@ class MainActivity : AppCompatActivity() {
         val rollButton: Button = findViewById(R.id.button)
         rollButton.setOnClickListener {
             println("button press")
-            client()
+            Thread {client()}.start()
         }
 
         //
     }
 
-    var resultText : String =" "
+    private var resultText : String =" DEFAULT TEXT "
 
     override fun onBackPressed() {
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
@@ -59,30 +59,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    public fun setMessage(newItem: String) {
+    fun setMessage(newItem: String) {
         if(newItem != "--")
         {
             resultText = newItem
-        println(resultText)}
-
+            println(resultText)
+        }
     }
 
-    fun getMessage() :String{
+    private fun getMessage() :String{
         return resultText
     }
 
     private fun client() {
+        //var message = resultText
         val client = Socket("192.168.0.14", 9999)
         val output = PrintWriter(client.getOutputStream(), true)
         val input = BufferedReader(InputStreamReader(client.inputStream))
 
-        resultText = "ima message "
+        //resultText = "ima message "
 
         //resultText = ClassificationResultsAdapter().getItemName()
 
-
-        println(" hello ")
-        output.println(resultText)
+        println(" [${getMessage()}")
+        output.println(getMessage())
         println("Client receiving [${input.readLine()}]")
         client.close()
     }
