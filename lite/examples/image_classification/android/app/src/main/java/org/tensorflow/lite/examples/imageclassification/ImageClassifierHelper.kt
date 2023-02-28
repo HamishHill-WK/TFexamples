@@ -18,13 +18,13 @@ package org.tensorflow.lite.examples.imageclassification
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.os.SystemClock
 import android.util.Log
 import android.view.Surface
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
-import org.tensorflow.lite.support.image.ops.Rot90Op
 import org.tensorflow.lite.task.core.BaseOptions
 import org.tensorflow.lite.task.core.vision.ImageProcessingOptions
 import org.tensorflow.lite.task.vision.classifier.Classifications
@@ -77,7 +77,7 @@ class ImageClassifierHelper(
         val modelName =
             when (currentModel) {
                 MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
-                MODEL_EFFICIENTNETV0 -> "model(3).tflite"
+                MODEL_EFFICIENTNETV0 -> "model.tflite"
                 MODEL_EFFICIENTNETV1 -> "efficientnet-lite1.tflite"
                 MODEL_EFFICIENTNETV2 -> "efficientnet-lite2.tflite"
                 else -> "mobilenetv1.tflite"
@@ -113,9 +113,13 @@ class ImageClassifierHelper(
         // Preprocess the image and convert it into a TensorImage for classification.
         val tensorImage = imageProcessor.process(TensorImage.fromBitmap(image))
 
-        val imageProcessingOptions = ImageProcessingOptions.builder()
+        val rect = Rect(10,10,10,10)
+
+        val imageProcessingOptions = ImageProcessingOptions.builder()//.setRoi(rect)
             .setOrientation(getOrientationFromRotation(rotation))
             .build()
+
+        Log.d(TAG, imageProcessingOptions.roi.toString())
 
         val results = imageClassifier?.classify(tensorImage, imageProcessingOptions)
         inferenceTime = SystemClock.uptimeMillis() - inferenceTime

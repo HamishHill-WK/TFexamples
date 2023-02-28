@@ -17,6 +17,7 @@ package org.tensorflow.lite.examples.objectdetection
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.os.SystemClock
 import android.util.Log
 import org.tensorflow.lite.gpu.CompatibilityList
@@ -24,8 +25,16 @@ import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.Rot90Op
 import org.tensorflow.lite.task.core.BaseOptions
+import org.tensorflow.lite.task.core.vision.ImageProcessingOptions
+import org.tensorflow.lite.task.vision.classifier.Classifications
+import org.tensorflow.lite.task.vision.classifier.ImageClassifier
 import org.tensorflow.lite.task.vision.detector.Detection
 import org.tensorflow.lite.task.vision.detector.ObjectDetector
+import android.R
+import android.graphics.RectF
+import androidx.core.graphics.toRect
+import java.io.InputStream
+
 
 class ObjectDetectorHelper(
   var threshold: Float = 0.5f,
@@ -85,7 +94,7 @@ class ObjectDetectorHelper(
         val modelName =
             when (currentModel) {
                 MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
-                MODEL_EFFICIENTDETV0 -> "efficientdet-lite0.tflite"
+                MODEL_EFFICIENTDETV0 -> "android(4).tflite"
                 MODEL_EFFICIENTDETV1 -> "efficientdet-lite1.tflite"
                 MODEL_EFFICIENTDETV2 -> "efficientdet-lite2.tflite"
                 else -> "mobilenetv1.tflite"
@@ -129,6 +138,42 @@ class ObjectDetectorHelper(
             inferenceTime,
             tensorImage.height,
             tensorImage.width)
+
+        if (results != null) {
+            for(result in results){
+            val rect = Rect()
+                result.boundingBox.round(rect)
+                Log.d(TAG, rect.toString())
+                classifyObjects(tensorImage, rect)
+
+            }
+        }
+    }
+
+    fun classifyObjects (image: TensorImage, box: Rect) {
+
+
+        val options = ImageClassifier.ImageClassifierOptions.builder()
+            .setBaseOptions(BaseOptions.builder().useGpu().build())
+            .setMaxResults(1)
+            .build()
+
+        val imageProcessingOptions = ImageProcessingOptions.builder()
+            .setRoi(box)
+            .build()
+
+        val modelFile = "model.tflite"
+
+        val imageClassifier = ImageClassifier.createFromFileAndOptions(
+            context, modelFile, options
+        )
+
+        val results: List<Classifications> = imageClassifier.classify(image, imageProcessingOptions)
+
+        if(results != null) {
+            for (result in results)
+                Log.d(TAG, result.toString())
+        }
     }
 
     interface DetectorListener {
@@ -150,4 +195,7 @@ class ObjectDetectorHelper(
         const val MODEL_EFFICIENTDETV1 = 2
         const val MODEL_EFFICIENTDETV2 = 3
     }
+
+    private val TAG = "ObjectDetectorHelper.kt"
+
 }
