@@ -32,6 +32,7 @@ import org.tensorflow.lite.task.vision.detector.Detection
 import org.tensorflow.lite.task.vision.detector.ObjectDetector
 import android.R
 import android.graphics.RectF
+import androidx.core.graphics.scale
 import androidx.core.graphics.toRect
 import java.io.InputStream
 
@@ -93,7 +94,7 @@ class ObjectDetectorHelper(
 
         val modelName =
             when (currentModel) {
-                MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
+                MODEL_MOBILENETV1 -> "android(4).tflite"
                 MODEL_EFFICIENTDETV0 -> "android(4).tflite"
                 MODEL_EFFICIENTDETV1 -> "efficientdet-lite1.tflite"
                 MODEL_EFFICIENTDETV2 -> "efficientdet-lite2.tflite"
@@ -143,32 +144,53 @@ class ObjectDetectorHelper(
             for(result in results){
                 val rect = Rect()
                 result.boundingBox.round(rect)
-                Log.d(TAG, rect.toString())
-                classifyObjects(tensorImage, rect)
+                var width = 0
+                var height = 0
+
+                if(rect.width() < 32)
+                    width = 32
+                else
+                    width = rect.width()
+
+                if(rect.height() < 32)
+                    height = 32
+                else
+                    height = rect.height()
+
+                Log.d(TAG, " ${rect.width()} , ${rect.height()}")
+                val img = Bitmap.createBitmap(image, rect.centerX(),
+                                                        rect.centerY(),
+                                                        width, height)
+
+                var img1 = Bitmap.createScaledBitmap(img, 500, 500, true)
+
+                classifyObjects(img1, imageRotation)
 
             }
         }
     }
 
-    fun classifyObjects (image: TensorImage, box: Rect) {
+    private fun classifyObjects (box: Bitmap, rot: Int) {
 
+        val imageProcessor =
+            ImageProcessor.Builder()
+                .add(Rot90Op(-rot / 90))
+                .build()
+
+        val tensorImage = imageProcessor.process(TensorImage.fromBitmap(box))
 
         val options = ImageClassifier.ImageClassifierOptions.builder()
             .setBaseOptions(BaseOptions.builder().useGpu().build())
             .setMaxResults(1)
             .build()
 
-        val imageProcessingOptions = ImageProcessingOptions.builder()
-            .setRoi(box)
-            .build()
-
-        val modelFile = "model.tflite"
+        val modelFile = "mnist.tflite"
 
         val imageClassifier = ImageClassifier.createFromFileAndOptions(
             context, modelFile, options
         )
 
-        val results: List<Classifications> = imageClassifier.classify(image, imageProcessingOptions)
+        val results: List<Classifications> = imageClassifier.classify(tensorImage)
 
         if(results != null) {
             for (result in results)
