@@ -17,8 +17,12 @@ package org.tensorflow.lite.examples.objectdetection
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.os.SystemClock
 import android.util.Log
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
@@ -26,6 +30,7 @@ import org.tensorflow.lite.support.image.ops.Rot90Op
 import org.tensorflow.lite.task.core.BaseOptions
 import org.tensorflow.lite.task.vision.detector.Detection
 import org.tensorflow.lite.task.vision.detector.ObjectDetector
+import kotlin.math.log
 
 class ObjectDetectorHelper(
   var threshold: Float = 0.5f,
@@ -84,7 +89,7 @@ class ObjectDetectorHelper(
 
         val modelName =
             when (currentModel) {
-                MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
+                MODEL_MOBILENETV1 -> "android(4).tflite"
                 MODEL_EFFICIENTDETV0 -> "efficientdet-lite0.tflite"
                 MODEL_EFFICIENTDETV1 -> "efficientdet-lite1.tflite"
                 MODEL_EFFICIENTDETV2 -> "efficientdet-lite2.tflite"
@@ -129,7 +134,51 @@ class ObjectDetectorHelper(
             inferenceTime,
             tensorImage.height,
             tensorImage.width)
+
+        if (results != null) {
+            for (result in results)
+            {
+                var rect = Rect()
+                result.boundingBox.round(rect)
+                //Log.d(TAG, result.boundingBox.toString())
+                Log.d(TAG, result.boundingBox.centerX().toString() + " "
+                        + result.boundingBox.centerY().toString() + " " +
+                        result.boundingBox.width().toString() + " " +
+                        result.boundingBox.height().toString())
+                Log.d(TAG, rect.centerX().toString() + " "
+                        + rect.centerY().toString() + " " +
+                        rect.width().toString() + " " +
+                        rect.height().toString())
+
+                //Log.d(TAG, rect.toString())
+                val img1 = Bitmap.createBitmap(image, rect.centerX(), rect.centerY(), 128, 128)
+                textRecog(img1)
+            }
+        }
     }
+
+    private fun textRecog (img: Bitmap){
+        val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+        val image = InputImage.fromBitmap(img, 0)
+
+        val result = recognizer.process(image)
+            .addOnSuccessListener { visionText ->
+                // Task completed successfully
+                // ...
+                if(visionText.text == "" )
+                    Log.d(TAG, "no text in image ")
+
+                else
+                    Log.d(TAG, "detected: " + visionText.text)
+            }
+            .addOnFailureListener { e ->
+                // Task failed with an exception
+                // ...
+                Log.d(TAG, "no text $e ")
+            }
+    }
+
+
 
     interface DetectorListener {
         fun onError(error: String)
@@ -149,5 +198,7 @@ class ObjectDetectorHelper(
         const val MODEL_EFFICIENTDETV0 = 1
         const val MODEL_EFFICIENTDETV1 = 2
         const val MODEL_EFFICIENTDETV2 = 3
+
+        private val TAG = "ObjectHelper"
     }
 }

@@ -56,6 +56,9 @@
 
             <!-- Declare notch support -->
             <meta-data android:name="android.notch_support" android:value="true"/>
+            <meta-data
+                android:name="com.google.mlkit.vision.DEPENDENCIES"
+                android:value="ocr" />
 
         </activity>
 
