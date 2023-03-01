@@ -15,6 +15,7 @@
  */
 package org.tensorflow.lite.examples.objectdetection
 
+import android.R.attr.bitmap
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
@@ -30,7 +31,9 @@ import org.tensorflow.lite.support.image.ops.Rot90Op
 import org.tensorflow.lite.task.core.BaseOptions
 import org.tensorflow.lite.task.vision.detector.Detection
 import org.tensorflow.lite.task.vision.detector.ObjectDetector
-import kotlin.math.log
+import java.io.File
+import java.io.FileOutputStream
+
 
 class ObjectDetectorHelper(
   var threshold: Float = 0.5f,
@@ -141,25 +144,51 @@ class ObjectDetectorHelper(
                 var rect = Rect()
                 result.boundingBox.round(rect)
                 //Log.d(TAG, result.boundingBox.toString())
-                Log.d(TAG, result.boundingBox.centerX().toString() + " "
-                        + result.boundingBox.centerY().toString() + " " +
-                        result.boundingBox.width().toString() + " " +
-                        result.boundingBox.height().toString())
+                //Log.d(TAG, result.boundingBox.centerX().toString() + " "
+                //        + result.boundingBox.centerY().toString() + " " +
+                //        result.boundingBox.width().toString() + " " +
+                //        result.boundingBox.height().toString())
+
                 Log.d(TAG, rect.centerX().toString() + " "
                         + rect.centerY().toString() + " " +
                         rect.width().toString() + " " +
                         rect.height().toString())
 
+                //if(rect.width() < 32)
+
+
                 //Log.d(TAG, rect.toString())
-                val img1 = Bitmap.createBitmap(image, rect.centerX(), rect.centerY(), 128, 128)
-                textRecog(img1)
+                val img1 = Bitmap.createBitmap(image, rect.centerX(), rect.centerY()
+                    , rect.width(), rect.height())
+
+                val img2 = Bitmap.createScaledBitmap(img1, 100, 100, true)
+                Log.d(TAG, " ${img2.width} , ${img2.height}")
+                textRecog(img2)
             }
         }
     }
 
+    var saved = false
+
     private fun textRecog (img: Bitmap){
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
         val image = InputImage.fromBitmap(img, 0)
+
+        if(!saved)
+        {
+            saved = true
+            try {
+                val file = File(filePath)
+                val fOut = FileOutputStream(file)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 85, fOut)
+                fOut.flush()
+                fOut.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LOG.i(null, "Save file error!")
+                return false
+            }
+        }
 
         val result = recognizer.process(image)
             .addOnSuccessListener { visionText ->
@@ -176,6 +205,7 @@ class ObjectDetectorHelper(
                 // ...
                 Log.d(TAG, "no text $e ")
             }
+        //Log.d(TAG, result.result.toString())
     }
 
 
