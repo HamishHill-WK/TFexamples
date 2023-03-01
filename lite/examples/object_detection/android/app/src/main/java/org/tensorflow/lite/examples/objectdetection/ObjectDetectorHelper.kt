@@ -141,7 +141,7 @@ class ObjectDetectorHelper(
 
         if (results != null) {
             for(result in results){
-            val rect = Rect()
+                val rect = Rect()
                 result.boundingBox.round(rect)
                 Log.d(TAG, rect.toString())
                 classifyObjects(tensorImage, rect)
