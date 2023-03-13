@@ -15,9 +15,12 @@
  */
 package org.tensorflow.lite.examples.objectdetection
 
+import android.R
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Rect
+import android.os.Environment
 import android.os.SystemClock
 import android.util.Log
 import org.tensorflow.lite.gpu.CompatibilityList
@@ -25,16 +28,13 @@ import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.Rot90Op
 import org.tensorflow.lite.task.core.BaseOptions
-import org.tensorflow.lite.task.core.vision.ImageProcessingOptions
 import org.tensorflow.lite.task.vision.classifier.Classifications
 import org.tensorflow.lite.task.vision.classifier.ImageClassifier
 import org.tensorflow.lite.task.vision.detector.Detection
 import org.tensorflow.lite.task.vision.detector.ObjectDetector
-import android.R
-import android.graphics.RectF
-import androidx.core.graphics.scale
-import androidx.core.graphics.toRect
-import java.io.InputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 
 
 class ObjectDetectorHelper(
@@ -157,18 +157,22 @@ class ObjectDetectorHelper(
                 else
                     height = rect.height()
 
-                Log.d(TAG, " ${rect.width()} , ${rect.height()}")
+                Log.d(TAG, " ${rect.centerX()} , ${rect.centerY()}")
                 val img = Bitmap.createBitmap(image, rect.centerX(),
                                                         rect.centerY(),
-                                                        width, height)
+                                                        64 , 64 )
 
-                var img1 = Bitmap.createScaledBitmap(img, 500, 500, true)
+               // var img1 = Bitmap.createScaledBitmap(img, 224, 224, false)
 
-                classifyObjects(img1, imageRotation)
+                classifyObjects(img, imageRotation)
 
             }
         }
     }
+
+
+    val modelFile = "model_fp16_E4.tflite"
+    var savedPic = true;
 
     private fun classifyObjects (box: Bitmap, rot: Int) {
 
@@ -184,8 +188,6 @@ class ObjectDetectorHelper(
             .setMaxResults(1)
             .build()
 
-        val modelFile = "mnist.tflite"
-
         val imageClassifier = ImageClassifier.createFromFileAndOptions(
             context, modelFile, options
         )
@@ -193,6 +195,27 @@ class ObjectDetectorHelper(
         val results: List<Classifications> = imageClassifier.classify(tensorImage)
 
         if(results != null) {
+            if(!savedPic) {
+                try{
+                val path = Environment.getExternalStorageDirectory().toString() + File.separator + results.toString()
+                val dir = File(path)
+                dir.createNewFile()
+
+                val bos = ByteArrayOutputStream()
+                box.compress(Bitmap.CompressFormat.PNG, 85, bos)
+                val data = bos.toByteArray()
+
+                val fout = FileOutputStream(dir)
+                fout.write(data)
+                fout.flush()
+                fout.close()
+                savedPic = true
+            }catch (e: Exception){
+                e.printStackTrace()
+                    Log.d(TAG, "error $e")
+            }
+            }
+
             for (result in results)
                 Log.d(TAG, result.toString())
         }
