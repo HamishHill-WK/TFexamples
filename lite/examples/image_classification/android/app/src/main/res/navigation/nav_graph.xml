@@ -8,13 +8,9 @@
         android:id="@+id/permissions_fragment"
         android:name="org.tensorflow.lite.examples.imageclassification.fragments.PermissionsFragment"
         android:label="PermissionsFragment">
-
         <action
-            android:id="@+id/action_permissions_to_camera"
-            app:destination="@id/camera_fragment"
-            app:popUpTo="@id/permissions_fragment"
-            app:popUpToInclusive="true" />
-
+            android:id="@+id/action_permissions_fragment_to_sheetFragment"
+            app:destination="@id/sheetFragment" />
     </fragment>
 
     <fragment
@@ -27,5 +23,20 @@
             app:destination="@id/permissions_fragment"
             app:popUpTo="@id/camera_fragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_camera_fragment_to_sheetFragment"
+            app:destination="@id/sheetFragment" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/sheetFragment"
+        android:name="org.tensorflow.lite.examples.imageclassification.fragments.SheetFragment"
+        android:label="SheetFragment" >
+        <action
+            android:id="@+id/action_sheetFragment_to_camera_fragment"
+            app:destination="@id/camera_fragment" />
+        <argument
+            android:name="result"
+            app:argType="string" />
     </fragment>
 </navigation>

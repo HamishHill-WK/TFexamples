@@ -75,9 +75,9 @@ class ImageClassifierHelper(
 
         val modelName =
             when (currentModel) {
-                MODEL_MOBILENETV1 -> "D6E10_model2_84_fp16.tflite"
+                MODEL_MOBILENETV1 -> "D6E20_NoAug_model2_89_fp16.tflite"
                 MODEL_EFFICIENTNETV0 -> "D6E10_model2_85_fp16.tflite"
-                MODEL_EFFICIENTNETV1 -> "D6E20_NoAug_model2_89_fp16.tflite"
+                MODEL_EFFICIENTNETV1 -> "D6E10_model2_84_fp16.tflite"
                 MODEL_EFFICIENTNETV2 -> "D6model_69_50E_fp16.tflite"
                 else -> "mobilenetv1.tflite"
             }
@@ -93,7 +93,7 @@ class ImageClassifierHelper(
         }
     }
 
-    fun classify(image: Bitmap, rotation: Int) {
+    fun classify (image: Bitmap, rotation: Int) : String {
         if (imageClassifier == null) {
             setupImageClassifier()
         }
@@ -127,6 +127,8 @@ class ImageClassifierHelper(
             results,
             inferenceTime
         )
+
+       return results?.get(0).toString()
     }
 
     // Receive the device rotation (Surface.x values range from 0->3) and return EXIF orientation

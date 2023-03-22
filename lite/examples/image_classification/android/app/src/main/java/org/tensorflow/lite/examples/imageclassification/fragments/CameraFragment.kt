@@ -30,6 +30,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.tensorflow.lite.examples.imageclassification.ImageClassifierHelper
 import org.tensorflow.lite.examples.imageclassification.R
@@ -150,23 +151,10 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
             }
         }
 
-        // When clicked, reduce the number of objects that can be classified at a time
-        fragmentCameraBinding.bottomSheetLayout.maxResultsMinus.setOnClickListener {
-            if (imageClassifierHelper.maxResults > 1) {
-                imageClassifierHelper.maxResults--
-                updateControlsUi()
-                classificationResultsAdapter.updateAdapterSize(size = imageClassifierHelper.maxResults)
-            }
-        }
+        imageClassifierHelper.maxResults = 1
+        classificationResultsAdapter.updateAdapterSize(size = imageClassifierHelper.maxResults)
 
         // When clicked, increase the number of objects that can be classified at a time
-        fragmentCameraBinding.bottomSheetLayout.maxResultsPlus.setOnClickListener {
-            if (imageClassifierHelper.maxResults < 3) {
-                imageClassifierHelper.maxResults++
-                updateControlsUi()
-                classificationResultsAdapter.updateAdapterSize(size = imageClassifierHelper.maxResults)
-            }
-        }
 
         fragmentCameraBinding.captureButton.setOnClickListener{
             classifyImg1()
@@ -326,12 +314,20 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
         return display?.rotation ?: 0
     }
 
+    var diceResult = ""
+
     fun classifyImg1()
     {
         if(newImage1 != null) {
             newImage1.use { bitmapBuffer.copyPixelsFromBuffer(newImage1?.planes?.get(0)?.buffer) }
 
-            imageClassifierHelper.classify(bitmapBuffer, getScreenOrientation())
+            diceResult = imageClassifierHelper.classify(bitmapBuffer, getScreenOrientation())
+
+
+            val action = CameraFragmentDirections.actionCameraFragmentToSheetFragment("21")
+            //LetterListFragmentDirections.actionLetterListFragmentToWordListFragment("d8")
+            // Navigate using that action
+            view?.findNavController()?.navigate(action)
         }
     }
 
