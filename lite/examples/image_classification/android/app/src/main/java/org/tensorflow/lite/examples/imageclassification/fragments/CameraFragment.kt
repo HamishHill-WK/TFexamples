@@ -25,12 +25,7 @@ import android.util.Log
 import android.view.*
 import android.widget.AdapterView
 import android.widget.Toast
-import androidx.camera.core.AspectRatio
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Camera
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -65,6 +60,9 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
 
+    //holder for captured image -hh
+    var newImage1: ImageProxy? = null
+
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
 
@@ -91,6 +89,8 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
         savedInstanceState: Bundle?
     ): View {
         _fragmentCameraBinding = FragmentCameraBinding.inflate(inflater, container, false)
+
+
 
         return fragmentCameraBinding.root
     }
@@ -166,6 +166,10 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
                 updateControlsUi()
                 classificationResultsAdapter.updateAdapterSize(size = imageClassifierHelper.maxResults)
             }
+        }
+
+        fragmentCameraBinding.captureButton.setOnClickListener{
+            classifyImg1()
         }
 
         // When clicked, decrease the number of threads used for classification
@@ -283,7 +287,10 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
                             )
                         }
 
-                        classifyImage(image)
+                        //storing image in a variable instead of sending to classification...
+                        //function every frame. -hh
+                        newImage1 = image
+                        //classifyImage(image)
                     }
                 }
 
@@ -319,7 +326,16 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
         return display?.rotation ?: 0
     }
 
-    private fun classifyImage(image: ImageProxy) {
+    fun classifyImg1()
+    {
+        if(newImage1 != null) {
+            newImage1.use { bitmapBuffer.copyPixelsFromBuffer(newImage1?.planes?.get(0)?.buffer) }
+
+            imageClassifierHelper.classify(bitmapBuffer, getScreenOrientation())
+        }
+    }
+
+    fun classifyImage(image: ImageProxy) {
         // Copy out RGB bits to the shared bitmap buffer
         image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
 

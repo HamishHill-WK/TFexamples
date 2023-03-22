@@ -29,6 +29,7 @@
         android:id="@+id/bottom_sheet_layout"
         layout="@layout/info_bottom_sheet" />
 
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_results"
         android:layout_width="match_parent"
@@ -41,6 +42,15 @@
         app:layout_anchor="@id/bottom_sheet_layout"
         app:layout_anchorGravity="top"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+
+    <Button
+        android:id="@+id/captureButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="capture"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
     <View
         android:layout_width="wrap_content"

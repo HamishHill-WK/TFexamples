@@ -18,7 +18,6 @@ package org.tensorflow.lite.examples.imageclassification
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Rect
 import android.os.SystemClock
 import android.util.Log
 import android.view.Surface
@@ -76,10 +75,10 @@ class ImageClassifierHelper(
 
         val modelName =
             when (currentModel) {
-                MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
-                MODEL_EFFICIENTNETV0 -> "model.tflite"
-                MODEL_EFFICIENTNETV1 -> "efficientnet-lite1.tflite"
-                MODEL_EFFICIENTNETV2 -> "efficientnet-lite2.tflite"
+                MODEL_MOBILENETV1 -> "D6E10_model2_84_fp16.tflite"
+                MODEL_EFFICIENTNETV0 -> "D6E10_model2_85_fp16.tflite"
+                MODEL_EFFICIENTNETV1 -> "D6E20_NoAug_model2_89_fp16.tflite"
+                MODEL_EFFICIENTNETV2 -> "D6model_69_50E_fp16.tflite"
                 else -> "mobilenetv1.tflite"
             }
 
@@ -110,16 +109,17 @@ class ImageClassifierHelper(
             ImageProcessor.Builder()
                 .build()
 
+        val newImage = Bitmap.createScaledBitmap(image, 224,224, true)
         // Preprocess the image and convert it into a TensorImage for classification.
-        val tensorImage = imageProcessor.process(TensorImage.fromBitmap(image))
+        val tensorImage = imageProcessor.process(TensorImage.fromBitmap(newImage))
 
-        val rect = Rect(10,10,10,10)
+        //val rect = Rect(10,10,10,10)
 
         val imageProcessingOptions = ImageProcessingOptions.builder()//.setRoi(rect)
             .setOrientation(getOrientationFromRotation(rotation))
             .build()
 
-        Log.d(TAG, imageProcessingOptions.roi.toString())
+        //Log.d(TAG, imageProcessingOptions.roi.toString())
 
         val results = imageClassifier?.classify(tensorImage, imageProcessingOptions)
         inferenceTime = SystemClock.uptimeMillis() - inferenceTime

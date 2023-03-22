@@ -160,7 +160,7 @@ class ObjectDetectorHelper(
                 Log.d(TAG, " ${rect.centerX()} , ${rect.centerY()}")
                 val img = Bitmap.createBitmap(image, rect.centerX(),
                                                         rect.centerY(),
-                                                        64 , 64 )
+                                                        128 , 128 )
 
                // var img1 = Bitmap.createScaledBitmap(img, 224, 224, false)
 
@@ -171,7 +171,7 @@ class ObjectDetectorHelper(
     }
 
 
-    val modelFile = "model_fp16_E4.tflite"
+    val modelFile = "mnist.tflite"
     var savedPic = true;
 
     private fun classifyObjects (box: Bitmap, rot: Int) {
