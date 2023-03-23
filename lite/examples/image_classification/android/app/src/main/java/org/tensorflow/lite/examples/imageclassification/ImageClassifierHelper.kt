@@ -84,7 +84,7 @@ class ImageClassifierHelper(
             }
 
         //D6E20_NoAug_model2_89_fp16.tflite is the best model so far -hh
-        //E10_Val_97_model4_fp16 also performs well but requires more testing -hh
+        //E10_Val_97_model4_fp16 also performs well when close but requires more testing -hh
 
         try {
             imageClassifier =
