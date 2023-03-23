@@ -30,11 +30,11 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.tensorflow.lite.examples.imageclassification.ImageClassifierHelper
 import org.tensorflow.lite.examples.imageclassification.R
 import org.tensorflow.lite.examples.imageclassification.databinding.FragmentCameraBinding
+import org.tensorflow.lite.support.label.Category
 import org.tensorflow.lite.task.vision.classifier.Classifications
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -42,7 +42,7 @@ import java.util.concurrent.Executors
 class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
 
     companion object {
-        private const val TAG = "Image Classifier"
+        private const val TAG = "ImageClassifier"
     }
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
@@ -91,14 +91,16 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
     ): View {
         _fragmentCameraBinding = FragmentCameraBinding.inflate(inflater, container, false)
 
-
-
         return fragmentCameraBinding.root
     }
+
+    private var capture = false
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        Log.d(TAG, "onviewcreated")
 
         imageClassifierHelper =
             ImageClassifierHelper(context = requireContext(), imageClassifierListener = this)
@@ -156,8 +158,12 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
 
         // When clicked, increase the number of objects that can be classified at a time
 
+
         fragmentCameraBinding.captureButton.setOnClickListener{
-            classifyImg1()
+            //capture = true
+            captureImages()
+            //classifyImg1()
+            //classifyList(frames)
         }
 
         // When clicked, decrease the number of threads used for classification
@@ -277,11 +283,27 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
 
                         //storing image in a variable instead of sending to classification...
                         //function every frame. -hh
+                        //if(capture){// && frames.size < 31) {
+
                         newImage1 = image
-                        //classifyImage(image)
+                        classifyImg1()
+
+                        //if(capture && frames.size < 31) {
+                            //newItem(image)
+                           // Log.d(TAG, "capturing: ${frames.size}")
+                        //}
+
+                        //if (capture&& frames.size == 31){ Log.d(TAG, "classifying: ${frames.size}")
+                            //classifyList(frames)
+                        //}
+
+                        //if(capture && frames.size >= 10) {
+                            //newItem(image)
+                           // classifyList(frames)
+                       // }
+                       // Log.d(TAG, newImage1.toString())
                     }
                 }
-
         // Must unbind the use-cases before rebinding them
         cameraProvider.unbindAll()
 
@@ -297,6 +319,10 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
         }
     }
 
+    private var frames: MutableList<Bitmap>  = mutableListOf()
+    private var results: MutableList<Category> = mutableListOf()
+    private var resultsString: MutableList<String> = mutableListOf()
+    private var confScores: MutableList<Float> = mutableListOf()
     private fun getScreenOrientation() : Int {
         val outMetrics = DisplayMetrics()
 
@@ -315,28 +341,85 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
     }
 
     var diceResult = ""
+    var confResult = 0.0f
 
+    private fun captureImages(){
+        capture = true
+        confScores.clear()
+        resultsString.clear()
+        //classifyList(frames)
+        Log.d(TAG, "capture called ")
+    }
     fun classifyImg1()
     {
         if(newImage1 != null) {
             newImage1.use { bitmapBuffer.copyPixelsFromBuffer(newImage1?.planes?.get(0)?.buffer) }
+            results = imageClassifierHelper.classify(bitmapBuffer, getScreenOrientation())!!
 
-            diceResult = imageClassifierHelper.classify(bitmapBuffer, getScreenOrientation())
+            if (capture && results.size > 0){
+                diceResult = results[0].label
+                confResult = results[0].score
+            }
 
-
-            val action = CameraFragmentDirections.actionCameraFragmentToSheetFragment("21")
+            if (capture && resultsString.size < 10){
+                confScores.add(0, confResult)
+                resultsString.add(0, diceResult)
+                Log.d(" camerafrag", diceResult )
+                if(resultsString.size == 10) {
+                    capture = false
+                    for((x,d) in resultsString.withIndex())
+                        Log.d(TAG, "$d score: ${confScores[x]}")
+                }
+            }
+            //val action = CameraFragmentDirections.actionCameraFragmentToSheetFragment(diceResult)
             //LetterListFragmentDirections.actionLetterListFragmentToWordListFragment("d8")
             // Navigate using that action
-            view?.findNavController()?.navigate(action)
+            //view?.findNavController()?.navigate(action)
         }
     }
+
+    private var r: MutableList<String> = mutableListOf()
+
+    private  var last: ImageProxy? = null
+    private lateinit var bit: Bitmap
+
+    fun newItem (Im: ImageProxy?){
+        if(Im != last){
+            Log.d(TAG, "newitem ${Im.toString()}")
+            last = Im
+            last.use { bitmapBuffer.copyPixelsFromBuffer(last?.planes?.get(0)?.buffer) }
+            bit = bitmapBuffer
+            frames.add(0, bit)
+            if (frames.size ==11)
+                frames = frames.dropLast(1).toMutableList()
+        }
+    }
+
+    fun classifyList(l: MutableList<Bitmap>) {
+        Log.d(TAG, "classify list called")
+        //capture = false
+
+        r.clear()
+
+        for (I in l) {
+            //I.use { bitmapBuffer.copyPixelsFromBuffer(newImage1?.planes?.get(0)?.buffer) }
+
+            //r.add( imageClassifierHelper.classify(I, getScreenOrientation()))
+        }
+        for (X in r){
+            Log.d(TAG, X)
+        }
+        frames.clear()
+    }
+
 
     fun classifyImage(image: ImageProxy) {
         // Copy out RGB bits to the shared bitmap buffer
         image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
 
-        // Pass Bitmap and rotation to the image classifier helper for processing and classification
         imageClassifierHelper.classify(bitmapBuffer, getScreenOrientation())
+        // Pass Bitmap and rotation to the image classifier helper for processing and classification
+        //resultsString.add(0, imageClassifierHelper.classify(bitmapBuffer, getScreenOrientation()))
     }
 
     @SuppressLint("NotifyDataSetChanged")

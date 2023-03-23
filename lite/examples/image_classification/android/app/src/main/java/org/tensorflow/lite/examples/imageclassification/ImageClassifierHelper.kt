@@ -24,6 +24,7 @@ import android.view.Surface
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.support.label.Category
 import org.tensorflow.lite.task.core.BaseOptions
 import org.tensorflow.lite.task.core.vision.ImageProcessingOptions
 import org.tensorflow.lite.task.vision.classifier.Classifications
@@ -75,12 +76,15 @@ class ImageClassifierHelper(
 
         val modelName =
             when (currentModel) {
-                MODEL_MOBILENETV1 -> "D6E20_NoAug_model2_89_fp16.tflite"
-                MODEL_EFFICIENTNETV0 -> "D6E10_model2_85_fp16.tflite"
-                MODEL_EFFICIENTNETV1 -> "D6E10_model2_84_fp16.tflite"
-                MODEL_EFFICIENTNETV2 -> "D6model_69_50E_fp16.tflite"
+                MODEL_MOBILENETV1 -> "E10_Val_Aug_97_model4_fp16.tflite"
+                MODEL_EFFICIENTNETV0 -> "E10_Val_97_model4_fp16.tflite"
+                MODEL_EFFICIENTNETV1 -> "ED6E20_NoAug_model2_89_fp16.tflite"
+                MODEL_EFFICIENTNETV2 -> "E20_Val_Aug_97_model4_fp16.tflite"
                 else -> "mobilenetv1.tflite"
             }
+
+        //D6E20_NoAug_model2_89_fp16.tflite is the best model so far -hh
+        //E10_Val_97_model4_fp16 also performs well but requires more testing -hh
 
         try {
             imageClassifier =
@@ -93,7 +97,7 @@ class ImageClassifierHelper(
         }
     }
 
-    fun classify (image: Bitmap, rotation: Int) : String {
+    fun classify (image: Bitmap, rotation: Int) : MutableList<Category>? {
         if (imageClassifier == null) {
             setupImageClassifier()
         }
@@ -109,9 +113,9 @@ class ImageClassifierHelper(
             ImageProcessor.Builder()
                 .build()
 
-        val newImage = Bitmap.createScaledBitmap(image, 224,224, true)
+        //val newImage = Bitmap.createScaledBitmap(image, 224,224, true)
         // Preprocess the image and convert it into a TensorImage for classification.
-        val tensorImage = imageProcessor.process(TensorImage.fromBitmap(newImage))
+        val tensorImage = imageProcessor.process(TensorImage.fromBitmap(image))
 
         //val rect = Rect(10,10,10,10)
 
@@ -127,8 +131,9 @@ class ImageClassifierHelper(
             results,
             inferenceTime
         )
+        //return results.toString()
 
-       return results?.get(0).toString()
+       return results?.get(0)?.categories
     }
 
     // Receive the device rotation (Surface.x values range from 0->3) and return EXIF orientation

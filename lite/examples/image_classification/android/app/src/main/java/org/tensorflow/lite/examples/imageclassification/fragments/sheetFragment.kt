@@ -27,11 +27,13 @@ class SheetFragment : Fragment() {
 
     private lateinit var letterId: String
 
+    private lateinit var resultText: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
-            letterId = it.getString(LETTER).toString()
+            letterId = it.getString(RESULT).toString()
         }
     }
 
@@ -45,7 +47,8 @@ class SheetFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         recyclerView = binding.root
-        val resultText: TextView = binding.RollResult
+
+        resultText = binding.RollResult
 
         if(letterId != null) {
             resultText.text = letterId
@@ -125,6 +128,6 @@ class SheetFragment : Fragment() {
     }
 
     companion object {
-        val LETTER = "letter"
+        val RESULT = "result"
     }
 }
