@@ -85,4 +85,8 @@
         <item>EfficientNet Lite1</item>
         <item>EfficientNet Lite2</item>
     </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="is_this_correct">Is this correct?</string>
+    <string name="i_got">I got :</string>
 </resources>
