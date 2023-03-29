@@ -160,7 +160,7 @@ class ObjectDetectorHelper(
                 Log.d(TAG, " ${rect.centerX()} , ${rect.centerY()}")
                 val img = Bitmap.createBitmap(image, rect.centerX(),
                                                         rect.centerY(),
-                                                        128 , 128 )
+                                                        224 , 224 )
 
                // var img1 = Bitmap.createScaledBitmap(img, 224, 224, false)
 
@@ -195,7 +195,7 @@ class ObjectDetectorHelper(
         val results: List<Classifications> = imageClassifier.classify(tensorImage)
 
         if(results != null) {
-            if(!savedPic) {
+            /*if(!savedPic) {
                 try{
                 val path = Environment.getExternalStorageDirectory().toString() + File.separator + results.toString()
                 val dir = File(path)
@@ -214,11 +214,13 @@ class ObjectDetectorHelper(
                 e.printStackTrace()
                     Log.d(TAG, "error $e")
             }
-            }
+            }*/
 
             for (result in results)
                 Log.d(TAG, result.toString())
         }
+
+
     }
 
     interface DetectorListener {

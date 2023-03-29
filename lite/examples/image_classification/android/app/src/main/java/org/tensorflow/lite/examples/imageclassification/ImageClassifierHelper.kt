@@ -78,7 +78,7 @@ class ImageClassifierHelper(
 
         val modelName =
             when (currentModel) {
-                MODEL_MOBILENETV1 -> "D6E20_NoAug_model2_89_fp16.tflite"
+                MODEL_MOBILENETV1 -> "D6E25_Val_Aug_model5_EN1_82_fp16.tflite"
                 MODEL_EFFICIENTNETV0 -> "D6E25_Val_Aug_model5_EN1_82_fp16.tflite"
                 MODEL_EFFICIENTNETV1 -> "D6E30_Val_Aug_model5_EN1_76_fp16.tflite"
                 MODEL_EFFICIENTNETV2 -> "D6E25_Val_Aug_model5_EN0_80_fp16.tflite"
@@ -124,9 +124,9 @@ class ImageClassifierHelper(
             ImageProcessor.Builder()
                 .build()
 
-        //val newImage = Bitmap.createScaledBitmap(image, 224,224, true)
+        val newImage = Bitmap.createScaledBitmap(image, 224,224, true)
         // Preprocess the image and convert it into a TensorImage for classification.
-        val tensorImage = imageProcessor.process(TensorImage.fromBitmap(image))
+        val tensorImage = imageProcessor.process(TensorImage.fromBitmap(newImage))
 
 
         rect = RectF(boxX-halfSide,boxY+halfSide,

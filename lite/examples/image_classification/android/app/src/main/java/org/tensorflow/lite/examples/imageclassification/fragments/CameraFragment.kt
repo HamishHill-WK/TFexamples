@@ -22,6 +22,7 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
+import android.util.Size
 import android.view.*
 import android.widget.AdapterView
 import android.widget.Toast
@@ -124,8 +125,16 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
                 imageClassifierHelper.setWidHeight(event.y, event.x)
                 fragmentCameraBinding.overlay.setBox(imageClassifierHelper.rect, event.y.toInt(), event.x.toInt())
                 Log.d(TAG,"Touch coordinates : " + event.x.toString() + "x" + event.y.toString())
+            }
+
+
+            if (event.action == MotionEvent.ACTION_UP) {
+                imageClassifierHelper.setWidHeight(event.y, event.x)
+                fragmentCameraBinding.overlay.setBox(imageClassifierHelper.rect, event.y.toInt(), event.x.toInt())
+                Log.d(TAG,"Touch coordinates : " + event.x.toString() + "x" + event.y.toString())
                 classifyImg1()
             }
+
             true
         }
 
@@ -188,7 +197,7 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
         // When clicked, decrease the number of threads used for classification
         fragmentCameraBinding.bottomSheetLayout.threadsMinus.setOnClickListener {
             if (imageClassifierHelper.numThreads > 1) {
-                imageClassifierHelper.numThreads--
+                imageClassifierHelper.numThreads = 4
                 updateControlsUi()
             }
         }
@@ -275,14 +284,14 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
         // Preview. Only using the 4:3 ratio because this is the closest to our models
         preview =
             Preview.Builder()
-                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                /*.setTargetAspectRatio(AspectRatio.RATIO_4_3)*/.setTargetResolution(Size(224,224))
                 .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
                 .build()
 
         // ImageAnalysis. Using RGBA 8888 to match how our models work
         imageAnalyzer =
             ImageAnalysis.Builder()
-                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                /*.setTargetAspectRatio(AspectRatio.RATIO_4_3)*/.setTargetResolution(Size(224,224))
                 .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
