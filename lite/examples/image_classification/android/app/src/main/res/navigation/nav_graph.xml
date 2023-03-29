@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/permissions_fragment">
 
@@ -8,13 +9,9 @@
         android:id="@+id/permissions_fragment"
         android:name="org.tensorflow.lite.examples.imageclassification.fragments.PermissionsFragment"
         android:label="PermissionsFragment">
-
         <action
-            android:id="@+id/action_permissions_to_camera"
-            app:destination="@id/camera_fragment"
-            app:popUpTo="@id/permissions_fragment"
-            app:popUpToInclusive="true" />
-
+            android:id="@+id/action_permissions_fragment_to_sheetFragment"
+            app:destination="@id/sheetFragment" />
     </fragment>
 
     <fragment
@@ -27,5 +24,35 @@
             app:destination="@id/permissions_fragment"
             app:popUpTo="@id/camera_fragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_camera_fragment_to_popUpFragment"
+            app:destination="@id/popUpFragment" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/sheetFragment"
+        android:name="org.tensorflow.lite.examples.imageclassification.fragments.SheetFragment"
+        android:label="SheetFragment" >
+        <action
+            android:id="@+id/action_sheetFragment_to_camera_fragment"
+            app:destination="@id/camera_fragment" />
+        <argument
+            android:name="result"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/popUpFragment"
+        android:name="org.tensorflow.lite.examples.imageclassification.fragments.PopUpFragment"
+        android:label="fragment_pop_up"
+        tools:layout="@layout/fragment_pop_up" >
+        <action
+            android:id="@+id/action_popUpFragment_to_sheetFragment"
+            app:destination="@id/sheetFragment" />
+        <argument
+            android:name="result"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_popUpFragment_to_camera_fragment"
+            app:destination="@id/camera_fragment" />
     </fragment>
 </navigation>

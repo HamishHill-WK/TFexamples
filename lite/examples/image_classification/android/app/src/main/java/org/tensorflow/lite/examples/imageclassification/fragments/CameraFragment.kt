@@ -25,28 +25,26 @@ import android.util.Log
 import android.view.*
 import android.widget.AdapterView
 import android.widget.Toast
-import androidx.camera.core.AspectRatio
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Camera
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.tensorflow.lite.examples.imageclassification.ImageClassifierHelper
 import org.tensorflow.lite.examples.imageclassification.R
 import org.tensorflow.lite.examples.imageclassification.databinding.FragmentCameraBinding
+import org.tensorflow.lite.support.label.Category
 import org.tensorflow.lite.task.vision.classifier.Classifications
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+
 class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
 
     companion object {
-        private const val TAG = "Image Classifier"
+        private const val TAG = "ImageClassifier"
     }
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
@@ -64,6 +62,9 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
+
+    //holder for captured image -hh
+    var newImage1: ImageProxy? = null
 
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
@@ -95,12 +96,17 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
         return fragmentCameraBinding.root
     }
 
+    private var capture = false
+
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        Log.d(TAG, "onviewcreated")
+
         imageClassifierHelper =
             ImageClassifierHelper(context = requireContext(), imageClassifierListener = this)
+
 
         with(fragmentCameraBinding.recyclerviewResults) {
             layoutManager = LinearLayoutManager(requireContext())
@@ -113,6 +119,33 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
             // Set up the camera and its use cases
             setUpCamera()
         }
+        fragmentCameraBinding.overlay.clear()
+        fragmentCameraBinding.overlay.setOnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                imageClassifierHelper.setWidHeight(event.y, event.x)
+                fragmentCameraBinding.overlay.setBox(imageClassifierHelper.rect, event.y.toInt(), event.x.toInt())
+                Log.d(TAG,"Touch coordinates : " + event.x.toString() + "x" + event.y.toString())
+            }
+
+
+            if (event.action == MotionEvent.ACTION_UP) {
+                imageClassifierHelper.setWidHeight(event.y, event.x)
+                fragmentCameraBinding.overlay.setBox(imageClassifierHelper.rect, event.y.toInt(), event.x.toInt())
+                Log.d(TAG,"Touch coordinates : " + event.x.toString() + "x" + event.y.toString())
+                classifyImg1()
+            }
+
+            true
+        }
+
+        //Log.d(TAG, "${preview?.resolutionInfo?.resolution?.height}, ${preview?.resolutionInfo?.resolution?.width!!}")
+
+        //imageClassifierHelper.setWidHeight(preview?.resolutionInfo?.resolution?.height!!,
+            //preview?.resolutionInfo?.resolution?.width!!)
+
+        //fragmentCameraBinding.overlay.setBox(imageClassifierHelper.rect,
+        //                    preview?.resolutionInfo?.resolution?.height!!,
+        //                    preview?.resolutionInfo?.resolution?.width!!)
 
         // Attach listeners to UI control widgets
         initBottomSheetControls()
@@ -150,28 +183,21 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
             }
         }
 
-        // When clicked, reduce the number of objects that can be classified at a time
-        fragmentCameraBinding.bottomSheetLayout.maxResultsMinus.setOnClickListener {
-            if (imageClassifierHelper.maxResults > 1) {
-                imageClassifierHelper.maxResults--
-                updateControlsUi()
-                classificationResultsAdapter.updateAdapterSize(size = imageClassifierHelper.maxResults)
-            }
-        }
+        imageClassifierHelper.maxResults = 1
+        classificationResultsAdapter.updateAdapterSize(size = imageClassifierHelper.maxResults)
 
         // When clicked, increase the number of objects that can be classified at a time
-        fragmentCameraBinding.bottomSheetLayout.maxResultsPlus.setOnClickListener {
-            if (imageClassifierHelper.maxResults < 3) {
-                imageClassifierHelper.maxResults++
-                updateControlsUi()
-                classificationResultsAdapter.updateAdapterSize(size = imageClassifierHelper.maxResults)
-            }
+        fragmentCameraBinding.captureButton.setOnClickListener{
+            //capture = true
+            //captureImages()
+            classifyImg1()
+            //classifyList(frames)
         }
 
         // When clicked, decrease the number of threads used for classification
         fragmentCameraBinding.bottomSheetLayout.threadsMinus.setOnClickListener {
             if (imageClassifierHelper.numThreads > 1) {
-                imageClassifierHelper.numThreads--
+                imageClassifierHelper.numThreads = 4
                 updateControlsUi()
             }
         }
@@ -258,14 +284,14 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
         // Preview. Only using the 4:3 ratio because this is the closest to our models
         preview =
             Preview.Builder()
-                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)//.setTargetResolution(Size(224,224))
                 .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
                 .build()
 
         // ImageAnalysis. Using RGBA 8888 to match how our models work
         imageAnalyzer =
             ImageAnalysis.Builder()
-                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)//.setTargetResolution(Size(224,224))
                 .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
@@ -282,11 +308,10 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
                                 Bitmap.Config.ARGB_8888
                             )
                         }
-
-                        classifyImage(image)
+                        newImage1 = image
+                        //classifyImage(image)
                     }
                 }
-
         // Must unbind the use-cases before rebinding them
         cameraProvider.unbindAll()
 
@@ -302,6 +327,10 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
         }
     }
 
+    private var frames: MutableList<Bitmap>  = mutableListOf()
+    private var results: MutableList<Category> = mutableListOf()
+    private var resultsString: MutableList<String> = mutableListOf()
+    private var confScores: MutableList<Float> = mutableListOf()
     private fun getScreenOrientation() : Int {
         val outMetrics = DisplayMetrics()
 
@@ -319,12 +348,51 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
         return display?.rotation ?: 0
     }
 
-    private fun classifyImage(image: ImageProxy) {
+    var diceResult = ""
+    var confResult = 0.0f
+
+    private fun captureImages(){
+        capture = true
+        confScores.clear()
+        resultsString.clear()
+        //classifyList(frames)
+        Log.d(TAG, "capture called ")
+    }
+    fun classifyImg1()
+    {
+        if(newImage1 != null) {
+            newImage1.use { bitmapBuffer.copyPixelsFromBuffer(newImage1?.planes?.get(0)?.buffer) }
+            results = imageClassifierHelper.classify(bitmapBuffer, getScreenOrientation())!!
+
+            if (results.size > 0){
+                diceResult = results[0].label!!
+                confResult = results[0].score!!
+            }
+
+            Log.d(TAG, diceResult)
+
+            if (diceResult != "")
+                if(diceResult.toInt() <= 6) {
+                    val action = CameraFragmentDirections.actionCameraFragmentToPopUpFragment(diceResult)
+                    //LetterListFragmentDirections.actionLetterListFragmentToWordListFragment("d8")
+                    // Navigate using that action
+                    view?.findNavController()?.navigate(action)
+                }
+        }
+    }
+
+
+    private  var last: ImageProxy? = null
+    private lateinit var bit: Bitmap
+
+
+    fun classifyImage(image: ImageProxy) {
         // Copy out RGB bits to the shared bitmap buffer
         image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
 
-        // Pass Bitmap and rotation to the image classifier helper for processing and classification
         imageClassifierHelper.classify(bitmapBuffer, getScreenOrientation())
+        // Pass Bitmap and rotation to the image classifier helper for processing and classification
+        //resultsString.add(0, imageClassifierHelper.classify(bitmapBuffer, getScreenOrientation()))
     }
 
     @SuppressLint("NotifyDataSetChanged")

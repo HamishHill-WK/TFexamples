@@ -15,8 +15,12 @@
  */
 package org.tensorflow.lite.examples.objectdetection
 
+import android.R
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Rect
+import android.os.Environment
 import android.os.SystemClock
 import android.util.Log
 import org.tensorflow.lite.gpu.CompatibilityList
@@ -24,8 +28,14 @@ import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.Rot90Op
 import org.tensorflow.lite.task.core.BaseOptions
+import org.tensorflow.lite.task.vision.classifier.Classifications
+import org.tensorflow.lite.task.vision.classifier.ImageClassifier
 import org.tensorflow.lite.task.vision.detector.Detection
 import org.tensorflow.lite.task.vision.detector.ObjectDetector
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+
 
 class ObjectDetectorHelper(
   var threshold: Float = 0.5f,
@@ -84,8 +94,8 @@ class ObjectDetectorHelper(
 
         val modelName =
             when (currentModel) {
-                MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
-                MODEL_EFFICIENTDETV0 -> "efficientdet-lite0.tflite"
+                MODEL_MOBILENETV1 -> "android(4).tflite"
+                MODEL_EFFICIENTDETV0 -> "android(4).tflite"
                 MODEL_EFFICIENTDETV1 -> "efficientdet-lite1.tflite"
                 MODEL_EFFICIENTDETV2 -> "efficientdet-lite2.tflite"
                 else -> "mobilenetv1.tflite"
@@ -129,6 +139,88 @@ class ObjectDetectorHelper(
             inferenceTime,
             tensorImage.height,
             tensorImage.width)
+
+        if (results != null) {
+            for(result in results){
+                val rect = Rect()
+                result.boundingBox.round(rect)
+                var width = 0
+                var height = 0
+
+                if(rect.width() < 32)
+                    width = 32
+                else
+                    width = rect.width()
+
+                if(rect.height() < 32)
+                    height = 32
+                else
+                    height = rect.height()
+
+                Log.d(TAG, " ${rect.centerX()} , ${rect.centerY()}")
+                val img = Bitmap.createBitmap(image, rect.centerX(),
+                                                        rect.centerY(),
+                                                        224 , 224 )
+
+               // var img1 = Bitmap.createScaledBitmap(img, 224, 224, false)
+
+                classifyObjects(img, imageRotation)
+
+            }
+        }
+    }
+
+
+    val modelFile = "mnist.tflite"
+    var savedPic = true;
+
+    private fun classifyObjects (box: Bitmap, rot: Int) {
+
+        val imageProcessor =
+            ImageProcessor.Builder()
+                .add(Rot90Op(-rot / 90))
+                .build()
+
+        val tensorImage = imageProcessor.process(TensorImage.fromBitmap(box))
+
+        val options = ImageClassifier.ImageClassifierOptions.builder()
+            .setBaseOptions(BaseOptions.builder().useGpu().build())
+            .setMaxResults(1)
+            .build()
+
+        val imageClassifier = ImageClassifier.createFromFileAndOptions(
+            context, modelFile, options
+        )
+
+        val results: List<Classifications> = imageClassifier.classify(tensorImage)
+
+        if(results != null) {
+            /*if(!savedPic) {
+                try{
+                val path = Environment.getExternalStorageDirectory().toString() + File.separator + results.toString()
+                val dir = File(path)
+                dir.createNewFile()
+
+                val bos = ByteArrayOutputStream()
+                box.compress(Bitmap.CompressFormat.PNG, 85, bos)
+                val data = bos.toByteArray()
+
+                val fout = FileOutputStream(dir)
+                fout.write(data)
+                fout.flush()
+                fout.close()
+                savedPic = true
+            }catch (e: Exception){
+                e.printStackTrace()
+                    Log.d(TAG, "error $e")
+            }
+            }*/
+
+            for (result in results)
+                Log.d(TAG, result.toString())
+        }
+
+
     }
 
     interface DetectorListener {
@@ -150,4 +242,7 @@ class ObjectDetectorHelper(
         const val MODEL_EFFICIENTDETV1 = 2
         const val MODEL_EFFICIENTDETV2 = 3
     }
+
+    private val TAG = "ObjectDetectorHelper.kt"
+
 }

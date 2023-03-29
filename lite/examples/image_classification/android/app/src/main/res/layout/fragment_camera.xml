@@ -19,6 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <androidx.camera.view.PreviewView
         android:id="@+id/view_finder"
         android:layout_width="match_parent"
@@ -28,6 +29,7 @@
     <include
         android:id="@+id/bottom_sheet_layout"
         layout="@layout/info_bottom_sheet" />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_results"
@@ -42,11 +44,28 @@
         app:layout_anchorGravity="top"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
+    <Button
+        android:id="@+id/captureButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="capture"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+
     <View
         android:layout_width="wrap_content"
-        android:layout_height="1dp"
-        android:background="@color/bounding_box_color"
+        android:layout_height="10dp"
+        android:background="#FF0000"
         app:layout_anchor="@id/recyclerview_results"
         app:layout_anchorGravity="bottom" />
+
+
+
+    <org.tensorflow.lite.examples.imageclassification.fragments.OverlayView
+        android:id="@+id/overlay"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

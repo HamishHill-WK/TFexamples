@@ -39,12 +39,16 @@
             android:layout_marginTop="?android:attr/actionBarSize"
             tools:context=".MainActivity"/>
 
+
+
+
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:layout_alignParentTop="true"
             android:background="@color/toolbar_background">
+
 
             <ImageView
                 android:layout_width="wrap_content"
