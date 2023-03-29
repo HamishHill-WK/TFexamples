@@ -56,9 +56,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         boxPaint.style = Paint.Style.STROKE
     }
 
-
-
-
     var boundingBox: RectF = RectF()// 100.0f, 100.0f, 200.0f,200.0f)
 
     override fun draw(canvas: Canvas) {

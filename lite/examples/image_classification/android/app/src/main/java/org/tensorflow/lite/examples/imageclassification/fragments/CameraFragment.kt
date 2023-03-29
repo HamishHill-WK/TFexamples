@@ -22,7 +22,6 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
-import android.util.Size
 import android.view.*
 import android.widget.AdapterView
 import android.widget.Toast
@@ -31,6 +30,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.tensorflow.lite.examples.imageclassification.ImageClassifierHelper
 import org.tensorflow.lite.examples.imageclassification.R
@@ -284,14 +284,14 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
         // Preview. Only using the 4:3 ratio because this is the closest to our models
         preview =
             Preview.Builder()
-                /*.setTargetAspectRatio(AspectRatio.RATIO_4_3)*/.setTargetResolution(Size(224,224))
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)//.setTargetResolution(Size(224,224))
                 .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
                 .build()
 
         // ImageAnalysis. Using RGBA 8888 to match how our models work
         imageAnalyzer =
             ImageAnalysis.Builder()
-                /*.setTargetAspectRatio(AspectRatio.RATIO_4_3)*/.setTargetResolution(Size(224,224))
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)//.setTargetResolution(Size(224,224))
                 .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
@@ -370,10 +370,14 @@ class CameraFragment : Fragment(), ImageClassifierHelper.ClassifierListener {
             }
 
             Log.d(TAG, diceResult)
-            //val action = CameraFragmentDirections.actionCameraFragmentToSheetFragment(diceResult)
-            //LetterListFragmentDirections.actionLetterListFragmentToWordListFragment("d8")
-            // Navigate using that action
-            //view?.findNavController()?.navigate(action)
+
+            if (diceResult != "")
+                if(diceResult.toInt() <= 6) {
+                    val action = CameraFragmentDirections.actionCameraFragmentToPopUpFragment(diceResult)
+                    //LetterListFragmentDirections.actionLetterListFragmentToWordListFragment("d8")
+                    // Navigate using that action
+                    view?.findNavController()?.navigate(action)
+                }
         }
     }
 

@@ -78,7 +78,7 @@ class ImageClassifierHelper(
 
         val modelName =
             when (currentModel) {
-                MODEL_MOBILENETV1 -> "D6E25_Val_Aug_model5_EN1_82_fp16.tflite"
+                MODEL_MOBILENETV1 -> "E5_Val_model9_fp16.tflite"
                 MODEL_EFFICIENTNETV0 -> "D6E25_Val_Aug_model5_EN1_82_fp16.tflite"
                 MODEL_EFFICIENTNETV1 -> "D6E30_Val_Aug_model5_EN1_76_fp16.tflite"
                 MODEL_EFFICIENTNETV2 -> "D6E25_Val_Aug_model5_EN0_80_fp16.tflite"
@@ -88,7 +88,7 @@ class ImageClassifierHelper(
         //D6E20_NoAug_model2_89_fp16.tflite is the best model so far -hh
         //E10_Val_97_model4_fp16 also performs well when close but requires more testing -hh
         //model2_78 worked well on ROI app
-        //mnist failed to indetify any faces correctly with roi
+        //mnist failed to identify any faces correctly with roi
         //
 
         try {
