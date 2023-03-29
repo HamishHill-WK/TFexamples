@@ -20,17 +20,23 @@ import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.tensorflow.lite.examples.imageclassification.databinding.ActivityMainBinding
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.PrintWriter
+import java.net.Socket
 
 class MainActivity : AppCompatActivity() {
     private lateinit var activityMainBinding: ActivityMainBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
-
-
         }
+
+        
+    
+
+    private var resultText : String =" DEFAULT TEXT "
 
     override fun onBackPressed() {
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
@@ -41,4 +47,33 @@ class MainActivity : AppCompatActivity() {
             super.onBackPressed()
         }
     }
+
+    fun setMessage(newItem: String) {
+        if(newItem != "--")
+        {
+            resultText = newItem
+            println(resultText)
+        }
+    }
+
+    private fun getMessage() :String{
+        return resultText
+    }
+
+    private fun client() {
+        //var message = resultText
+        val client = Socket("192.168.0.14", 9999)
+        val output = PrintWriter(client.getOutputStream(), true)
+        val input = BufferedReader(InputStreamReader(client.inputStream))
+
+        //resultText = "ima message "
+
+        //resultText = ClassificationResultsAdapter().getItemName()
+
+        println(" [${getMessage()}")
+        output.println(getMessage())
+        println("Client receiving [${input.readLine()}]")
+        client.close()
+    }
+
 }

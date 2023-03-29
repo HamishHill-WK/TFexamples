@@ -62,6 +62,7 @@
         app:layout_anchorGravity="bottom" />
 
 
+
     <org.tensorflow.lite.examples.imageclassification.fragments.OverlayView
         android:id="@+id/overlay"
         android:layout_height="match_parent"
